@@ -47,4 +47,22 @@ describe('/api/articles/:article_id', () => {
             expect(body.article.article_id).toEqual(article_id)
         })
     });
+    test('Returns a 400 error if an invalid ID parameter is used', () => {
+        const article_id = "a"
+        return request(app)
+        .get(`/api/articles/${article_id}`)
+        .expect(400)
+        .then(({body}) => {
+            expect(body).toEqual({msg: "Invalid article id"})
+        })
+    })
+    test('Returns a 404 error when a valid ID is passed that does not correspond to a row in the DB', () => {
+        const article_id = 9999
+        return request(app)
+        .get(`/api/articles/${article_id}`)
+        .expect(404)
+        .then(({body}) => {
+            expect(body).toEqual({msg: "No article with this ID"})
+        })
+    });
 });
