@@ -1,8 +1,7 @@
 # Northcoders News API
 
-For instructions, please head over to [L2C NC News](https://l2c.northcoders.com/courses/be/nc-news).
-
-
+## Environment Variables
+The necessary .env files for the databases have been omitted from this project, in order to connect to the databases you must create your own in the format: PGDATABASE="database_name_here" with reference to the database names located in './db/setup.sql'
 
 --- 
 
