@@ -11,6 +11,7 @@ exports.fetchArticleByID = (id) => {
         if(rows.length === 0){
             return Promise.reject({status:404, msg:"No article with this ID"})
         }
+        console.log(rows[0])
         return rows[0];
     })
 }

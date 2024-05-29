@@ -1,5 +1,3 @@
-Complete error handling for articles/:article_id FINISHED
-    Needs to handle valid format parameters that do not appear in the database FINISHED
-
 Review possible additional test cases for articles/:article_id
+    Add description to endpoints.json
     When completed do a pull request for this feature and delete branch
