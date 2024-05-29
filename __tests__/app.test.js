@@ -64,7 +64,7 @@ describe("/api/articles", () => {
     return request(app)
     .get("/api/articles")
     .then(({body}) => {
-        expect(body.articles).toBeSorted('created_at', { descending: true})
+        expect(body.articles).toBeSortedBy('created_at', { descending: true})
     })
   });
 });
@@ -106,6 +106,44 @@ describe("/api/articles/:article_id", () => {
         expect(body).toEqual({ msg: "No article with this ID" });
       });
   });
+});
+
+describe('/api/articles/:article_id/comments', () => {
+  test('Returns comments with correct properties', () => {
+    const article_id = 1;
+    return request(app)
+    .get(`/api/articles/${article_id}/comments`)
+    .expect(200)
+    .then(({ body }) => {
+      body.comments.forEach((comment) => {
+        expect(comment).toMatchObject({
+          comment_id:expect.any(Number),
+          votes: expect.any(Number),
+          created_at: expect.any(String),
+          author: expect.any(String),
+          body: expect.any(String),
+          article_id: expect.any(Number)
+        })
+      })
+    })
+  });
+  test('Comments are sorted by newest to oldest', () => {
+    const article_id = 1;
+    return request(app)
+    .get(`/api/articles/${article_id}/comments`)
+    .then(({ body }) => {
+      expect(body.comments).toBeSortedBy('created_at', {ascending:true})
+    })
+  })
+  test('Returns 404 if ID is valid but not present in DB', () => {
+    const article_id = 9999;
+    return request(app)
+    .get(`/api/articles/${article_id}/comments`)
+    .expect(404)
+    .then(({body}) => {
+      expect(body).toEqual({msg:'ID not found'})
+    })
+  })
 });
 
 //utility/helper functions
