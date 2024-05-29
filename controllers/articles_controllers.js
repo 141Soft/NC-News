@@ -1,5 +1,6 @@
 const { fetchArticleByID, fetchArticles } = require('../models/articles_models')
-const { fetchCommentsByID } = require('../models/comments_models')
+const { fetchCommentsByID, postComment } = require('../models/comments_models')
+
 
 exports.getArticleByID = (req, res, next) => {
     const { article_id } = req.params;
@@ -19,4 +20,14 @@ exports.getCommentsByID = (req, res, next) => {
     fetchCommentsByID(article_id).then((comments) => {
         res.status(200).send({ comments })
     }).catch(next);
+}
+
+exports.postCommentByID = (req, res, next) => {
+    const { article_id } = req.params;
+    const newComment = req.body;
+    postComment(article_id, newComment).then((comment) => {
+        console.log(comment)
+        res.status(201).send({comment})
+    }).catch(next)
+    
 }

@@ -108,7 +108,7 @@ describe("/api/articles/:article_id", () => {
   });
 });
 
-describe('/api/articles/:article_id/comments', () => {
+describe('GET /api/articles/:article_id/comments', () => {
   test('Returns comments with correct properties', () => {
     const article_id = 1;
     return request(app)
@@ -144,6 +144,26 @@ describe('/api/articles/:article_id/comments', () => {
       expect(body).toEqual({msg:'ID not found'})
     })
   })
+});
+
+describe.only('POST /api/articles/:article_id/comments', () => {
+  test('Returns 201 and the posted comment', () => {
+    const article_id = 1;
+    return request(app)
+    .post(`/api/articles/${article_id}/comments`)
+    .send({username: "lurker", body: "Hi, my name is Frank"})
+    .expect(201)
+    .then(({body}) => {
+      expect(body.comment).toMatchObject({
+        article_id: 1,
+        author: "lurker",
+        body: "Hi, my name is Frank",
+        comment_id: expect.any(Number),
+        created_at: expect.any(String),
+        votes: expect.any(Number)
+      })
+    })
+  });
 });
 
 //utility/helper functions

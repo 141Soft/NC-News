@@ -10,3 +10,10 @@ exports.fetchCommentsByID = (article_id) => {
         })
     })
 }
+
+exports.postComment = (article_id, newComment) => {
+    const { username, body } = newComment;
+    return db
+    .query("INSERT INTO comments (author, body, article_id, votes) VALUES ($1, $2, $3, $4) RETURNING *;", [username, body, article_id, 0])
+    .then(({ rows }) => rows[0])
+}
