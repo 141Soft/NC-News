@@ -1,0 +1,3 @@
+Review possible additional test cases for articles/:article_id
+    Add description to endpoints.json
+    When completed do a pull request for this feature and delete branch

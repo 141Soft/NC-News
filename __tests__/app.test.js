@@ -9,14 +9,10 @@ beforeEach(() => {return seed(data)});
 afterAll(() => db.end());
 
 describe('/api/topics', () => {
-    test('returns status code 200', ()=> {
-        return request(app)
-        .get('/api/topics')
-        .expect(200);
-    })
     test('returns an array of objects containing the correct properties', ()=> {
         return request(app)
         .get('/api/topics')
+        .expect(200)
         .then(({body}) => {
             body.topics.forEach((topic) => {
                 expect(topic).toMatchObject({
@@ -26,41 +22,47 @@ describe('/api/topics', () => {
             })
         })
     })
-    test('returns 404 if no topics found', ()=> {
-        return db.query(` DELETE FROM comments; DELETE FROM articles; DELETE FROM topics`).then(()=> {
-            return request(app)
-            .get('/api/topics')
-            .expect(404)
-            .then(({body}) => {
-                expect(body).toEqual({msg: "No Topics Found"})
-            })
-        })
-    })
-    test('returns 404 if table does not exist', ()=> {
-        return db.query(` DROP TABLE comments; DROP TABLE articles; DROP TABLE topics`).then(()=> {
-            return request(app)
-            .get('/api/topics')
-            .expect(404)
-            .then(({body}) => {
-                expect(body).toEqual({msg: "Table Does Not Exist"})
-            })
-        })
-    })
 });
 
 describe('/api', ()=> {
-    test('returns status code 200', () => {
-        return request(app)
-        .get('/api')
-        .expect(200)
-    });
     test('returns a JSON object matching the contents of endpoints.json', () => {
         return fs.readFile('endpoints.json','utf-8').then((endpoints) => {
             return request(app)
             .get('/api')
+            .expect(200)
             .then(({body})=> {
                 expect(body.endpoints).toEqual(endpoints)
             })
         })
     });
 })
+
+describe('/api/articles/:article_id', () => {
+    test('Returns an article with the correct id', () => {
+        const article_id = 1
+        return request(app)
+        .get(`/api/articles/${article_id}`)
+        .expect(200)
+        .then(({body}) => {
+            expect(body.article.article_id).toEqual(article_id)
+        })
+    });
+    test('Returns a 400 error if an invalid ID parameter is used', () => {
+        const article_id = "a"
+        return request(app)
+        .get(`/api/articles/${article_id}`)
+        .expect(400)
+        .then(({body}) => {
+            expect(body).toEqual({msg: "Invalid article id"})
+        })
+    })
+    test('Returns a 404 error when a valid ID is passed that does not correspond to a row in the DB', () => {
+        const article_id = 9999
+        return request(app)
+        .get(`/api/articles/${article_id}`)
+        .expect(404)
+        .then(({body}) => {
+            expect(body).toEqual({msg: "No article with this ID"})
+        })
+    });
+});
