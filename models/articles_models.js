@@ -12,19 +12,21 @@ exports.fetchArticleByID = (id) => {
         if(rows.length === 0){
             return Promise.reject({status:404, msg:"No article with this ID"})
         }
-        console.log(rows[0])
         return rows[0];
     })
 }
 
 exports.fetchArticles = () => {
     return db
-    .query("SELECT article_id, title, topic, author, created_at, votes, article_img_url FROM articles")
+    .query("SELECT article_id, title, topic, author, created_at, votes, article_img_url FROM articles ORDER BY created_at DESC")
     .then(({ rows }) => {
+        if(rows.length === 0){
+            return Promise.reject({status:404,msg:"No articles found"})
+        }
         return Promise.all(rows.map((article) => {
             return commentCount(article.article_id)
-            .then((result) => {
-                article.comment_count = result
+            .then((commentTotal) => {
+                article.comment_count = commentTotal
                 return article
             })
         }))
