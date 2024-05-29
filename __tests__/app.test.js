@@ -37,6 +37,28 @@ describe('/api', ()=> {
     });
 })
 
+describe.only('/api/articles', () => {
+    test('Returns all articles with comment count property', () => {
+        return request(app)
+        .get('/api/articles')
+        .expect(200)
+        .then(({body}) => {
+            body.articles.forEach((article) => {
+                expect(article).toMatchObject({
+                    article_id:expect.any(Number),
+                    title: expect.any(String),
+                    topic:expect.any(String),
+                    author: expect.any(String),
+                    created_at:expect.any(String),
+                    votes:expect.any(Number),
+                    article_img_url:expect.any(String),
+                    comment_count:expect.any(Number)
+                })
+            })
+        })
+    });
+});
+
 describe('/api/articles/:article_id', () => {
     test('Returns an article with the correct id', () => {
         const article_id = 1
