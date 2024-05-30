@@ -3,9 +3,6 @@ const { forEach } = require('../db/data/test-data/articles');
 const { commentCount } = require('./model_utils/commentCount')
 
 exports.fetchArticleByID = (id) => {
-    if(isNaN(id)){
-        return Promise.reject({status:400, msg:"Invalid article id"})
-    }
     return db
     .query("SELECT * FROM articles WHERE article_id = $1;", [id])
     .then(({rows}) => {

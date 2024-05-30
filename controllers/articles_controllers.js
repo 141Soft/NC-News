@@ -26,7 +26,6 @@ exports.postCommentByID = (req, res, next) => {
     const { article_id } = req.params;
     const newComment = req.body;
     postComment(article_id, newComment).then((comment) => {
-        console.log(comment)
         res.status(201).send({comment})
     }).catch(next)
     

@@ -27,6 +27,26 @@ app.use((err, req, res, next) => {
   });
 
 app.use((err, req, res, next) => {
+  if(err.code === '22P02') {
+    res.status(400).send({msg: 'Invalid ID'})
+  }
+  next(err)
+})
+
+app.use((err, req, res, next) => {
+  if(err.code === '23502'){
+    res.status(400).send({msg: 'Missing required property for db update'})
+  }
+  next(err)
+})
+
+app.use((err, req, res, next) => {
+  if(err.code === '23503'){
+    res.status(400).send({msg: 'Request body conflicts with db'})
+  }
+})
+
+app.use((err, req, res, next) => {
     if(err.code === '42P01') {
         console.log("hit")
         res.status(404).send({msg: 'Table Does Not Exist'})
