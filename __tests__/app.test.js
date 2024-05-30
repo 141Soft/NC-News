@@ -96,6 +96,15 @@ describe("/api/articles", () => {
   });
 });
 
+describe('/api/articles?topics', () => {
+  test("returns 200", () => {
+    const topic = 'mitch'
+    return request(app)
+      .get(`/api/articles?topic=${topic}`)
+      .expect(200)
+  })
+});
+
 describe("/api/articles/:article_id", () => {
   test("Returns an article with the correct id", () => {
     const article_id = 1;
