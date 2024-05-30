@@ -1,5 +1,4 @@
 const db = require('../db/connection');
-const { forEach } = require('../db/data/test-data/articles');
 const { commentCount } = require('./model_utils/commentCount')
 
 exports.fetchArticleByID = (id) => {
@@ -37,5 +36,17 @@ exports.checkID = (article_id) => {
         if(rows.length === 0){
             return Promise.reject({status:404, msg: 'ID not found'})
         }
+    })
+}
+
+exports.updateVotes = (article_id, numVotes) => {
+    return this.checkID((article_id))
+    .then(() => {
+        return db
+        .query("SELECT * FROM articles WHERE article_id = $1", [article_id])
+    })
+    .then(({ rows }) => {
+        rows[0].votes += numVotes
+        return rows[0]
     })
 }
