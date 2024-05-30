@@ -24,7 +24,7 @@ describe("/api", () => {
   });
 });
 
-describe.only("GET /api/users", () => {
+describe("GET /api/users", () => {
   test("Return an array of users", () => {
     return request(app)
       .get("/api/users")
