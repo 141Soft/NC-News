@@ -1,4 +1,4 @@
-const { fetchArticleByID, fetchArticles } = require('../models/articles_models')
+const { fetchArticleByID, fetchArticles, updateVotes } = require('../models/articles_models')
 const { fetchCommentsByID, postComment } = require('../models/comments_models')
 
 
@@ -29,4 +29,15 @@ exports.postCommentByID = (req, res, next) => {
         res.status(201).send({comment})
     }).catch(next)
     
+}
+
+exports.patchArticleByID = (req, res, next) => {
+    const { article_id } = req.params;
+    const { inc_votes } = req.body;
+    
+    if(!inc_votes){return res.status(400).send({msg: 'Bad Request'})}
+    
+    updateVotes(article_id, inc_votes).then((article) => {
+        res.status(201).send({article})
+    }).catch(next)
 }

@@ -205,6 +205,81 @@ describe('POST /api/articles/:article_id/comments', () => {
   })
 });
 
+describe.only('PATCH /api/articles/:article_id', () => {
+  test('Returns 201 and article with correct updated vote count', () => {
+    const article_id = 1;
+    return request(app)
+    .patch(`/api/articles/${article_id}`)
+    .send({ inc_votes: 10 })
+    .expect(201)
+    .then(({body}) => {
+      expect(body.article).toMatchObject({
+        article_id:article_id,
+        title: expect.any(String),
+        topic: expect.any(String),
+        author: expect.any(String),
+        body: expect.any(String),
+        created_at: expect.any(String),
+        votes: 110,
+        article_img_url: expect.any(String)
+      })
+    })
+  });
+
+  test('Has correct vote count with negative vote numbers', () => {
+    const article_id = 1;
+    return request(app)
+    .patch(`/api/articles/${article_id}`)
+    .send({ inc_votes: -10 })
+    .expect(201)
+    .then(({body}) => {
+      expect(body.article).toMatchObject({
+        article_id:article_id,
+        title: expect.any(String),
+        topic: expect.any(String),
+        author: expect.any(String),
+        body: expect.any(String),
+        created_at: expect.any(String),
+        votes: 90,
+        article_img_url: expect.any(String)
+      })
+    })
+  })
+
+  test('Returns 404 if ID is valid but not present in DB', () => {
+    const article_id = 9999;
+    return request(app)
+    .patch(`/api/articles/${article_id}`)
+    .send({ inc_votes: 1 })
+    .expect(404)
+    .then(({body}) => {
+      expect(body).toEqual({msg: 'ID not found'})
+    })
+  })
+
+  test('Returns 400 for missing vote property in request body', () => {
+    const article_id = 1;
+    return request(app)
+    .patch(`/api/articles/${article_id}`)
+    .send({})
+    .expect(400)
+    .then(({body}) => {
+      expect(body).toEqual({msg: 'Bad Request'})
+    })
+  })
+
+  test('Returns 400 for invalid id', () => {
+    const article_id = 'a';
+    return request(app)
+    .patch(`/api/articles/${article_id}`)
+    .send({ inc_votes: 1 })
+    .expect(400)
+    .then(({body}) => {
+      expect(body).toEqual({msg: 'Invalid ID'})
+    })
+  })
+});
+
 //utility/helper functions
 
 describe("commentCount", () => {
