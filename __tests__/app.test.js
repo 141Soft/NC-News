@@ -46,6 +46,7 @@ describe("/api/articles", () => {
       .get("/api/articles")
       .expect(200)
       .then(({ body }) => {
+        expect(body.articles.length).toBeGreaterThanOrEqual(1)
         body.articles.forEach((article) => {
           expect(article).toMatchObject({
             article_id: expect.any(Number),
@@ -94,7 +95,7 @@ describe("/api/articles/:article_id", () => {
       .get(`/api/articles/${article_id}`)
       .expect(400)
       .then(({ body }) => {
-        expect(body).toEqual({ msg: "Invalid article id" });
+        expect(body).toEqual({ msg: 'Invalid ID' });
       });
   });
   test("Returns a 404 error when a valid ID is passed that does not correspond to a row in the DB", () => {
@@ -108,7 +109,7 @@ describe("/api/articles/:article_id", () => {
   });
 });
 
-describe('/api/articles/:article_id/comments', () => {
+describe('GET /api/articles/:article_id/comments', () => {
   test('Returns comments with correct properties', () => {
     const article_id = 1;
     return request(app)
@@ -122,7 +123,7 @@ describe('/api/articles/:article_id/comments', () => {
           created_at: expect.any(String),
           author: expect.any(String),
           body: expect.any(String),
-          article_id: expect.any(Number)
+          article_id: article_id,
         })
       })
     })
@@ -135,6 +136,15 @@ describe('/api/articles/:article_id/comments', () => {
       expect(body.comments).toBeSortedBy('created_at', {ascending:true})
     })
   })
+  test('Returns 200 and empty for article with no comments', () => {
+    const article_id = 2
+    return request(app)
+    .get(`/api/articles/${article_id}/comments`)
+    .expect(200)
+    .then(({ body }) => {
+      expect(body.comments).toEqual([])
+    })
+  })
   test('Returns 404 if ID is valid but not present in DB', () => {
     const article_id = 9999;
     return request(app)
@@ -142,6 +152,55 @@ describe('/api/articles/:article_id/comments', () => {
     .expect(404)
     .then(({body}) => {
       expect(body).toEqual({msg:'ID not found'})
+    })
+  })
+  test('Returns 400 if ID is invalid', () => {
+    const article_id = 'a'
+    return request(app)
+    .get(`/api/articles/${article_id}/comments`)
+    .expect(400)
+    .then(({ body }) => {
+      expect(body).toEqual({msg: 'Invalid ID'})
+    })
+  })
+});
+
+describe('POST /api/articles/:article_id/comments', () => {
+  test('Returns 201 and the posted comment', () => {
+    const article_id = 1;
+    return request(app)
+    .post(`/api/articles/${article_id}/comments`)
+    .send({username: "lurker", body: "Hi, my name is Frank"})
+    .expect(201)
+    .then(({body}) => {
+      expect(body.comment).toMatchObject({
+        article_id: 1,
+        author: "lurker",
+        body: "Hi, my name is Frank",
+        comment_id: expect.any(Number),
+        created_at: expect.any(String),
+        votes: expect.any(Number)
+      })
+    })
+  });
+  test('Returns 400 for missing username or body', () => {
+    const article_id = 1;
+    return request(app)
+    .post(`/api/articles/${article_id}/comments`)
+    .send({})
+    .expect(400)
+    .then(({body}) => {
+      expect(body).toEqual({msg: 'Missing required property for db update'})
+    })
+  });
+  test('Returns 400 on incorrect username', () => {
+    const article_id =1;
+    return request(app)
+    .post(`/api/articles/${article_id}/comments`)
+    .send({username: "fr4nk", body: "Hi, my name is Frank"})
+    .expect(400)
+    .then(({body}) => {
+      expect(body).toEqual({msg: 'Request body conflicts with db'})
     })
   })
 });
