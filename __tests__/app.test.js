@@ -179,10 +179,29 @@ describe('POST /api/articles/:article_id/comments', () => {
         body: "Hi, my name is Frank",
         comment_id: expect.any(Number),
         created_at: expect.any(String),
-        votes: expect.any(Number)
+        votes: 0,
       })
     })
   });
+
+  test('Returns 201 when passed additional unnecessary request properties', () => {
+    const article_id = 1;
+    return request(app)
+    .post(`/api/articles/${article_id}/comments`)
+    .send({username: "lurker", body: "Hi, my name is Frank", legs: 8, spinsWebs: true})
+    .expect(201)
+    .then(({body}) => {
+      expect(body.comment).toMatchObject({
+        article_id: 1,
+        author: "lurker",
+        body: "Hi, my name is Frank",
+        comment_id: expect.any(Number),
+        created_at: expect.any(String),
+        votes: 0,
+      })
+    })
+  });
+
   test('Returns 400 for missing username or body', () => {
     const article_id = 1;
     return request(app)
@@ -203,9 +222,29 @@ describe('POST /api/articles/:article_id/comments', () => {
       expect(body).toEqual({msg: 'Request body conflicts with db'})
     })
   })
+  test('Returns 404 if ID is valid but not present in DB', ()=> {
+    const article_id =9999;
+    return request(app)
+    .post(`/api/articles/${article_id}/comments`)
+    .send({username: "fr4nk", body: "Hi, my name is Frank"})
+    .expect(404)
+    .then(({body}) => {
+      expect(body).toEqual({msg: 'ID not found'})
+    })
+  })
+  test('Returns 400 on invalid ID', () => {
+    const article_id ='a';
+    return request(app)
+    .post(`/api/articles/${article_id}/comments`)
+    .send({username: "fr4nk", body: "Hi, my name is Frank"})
+    .expect(400)
+    .then(({body}) => {
+      expect(body).toEqual({msg: 'Invalid ID'})
+    })
+  })
 });
 
-describe.only('PATCH /api/articles/:article_id', () => {
+describe('PATCH /api/articles/:article_id', () => {
   test('Returns 201 and article with correct updated vote count', () => {
     const article_id = 1;
     return request(app)
@@ -273,6 +312,36 @@ describe.only('PATCH /api/articles/:article_id', () => {
     return request(app)
     .patch(`/api/articles/${article_id}`)
     .send({ inc_votes: 1 })
+    .expect(400)
+    .then(({body}) => {
+      expect(body).toEqual({msg: 'Invalid ID'})
+    })
+  })
+});
+
+describe('DELETE /api/comments/:comment_id', () => {
+  test('Returns 204 and empty object', () => {
+    const comment_id = 1;
+    return request(app)
+    .delete(`/api/comments/${comment_id}`)
+    .expect(204)
+    .then(({body}) => {
+      expect(body).toEqual({})
+    })
+  });
+  test('Returns 404 if ID is valid but not present in DB', () => {
+    const comment_id = 9999;
+    return request(app)
+    .delete(`/api/comments/${comment_id}`)
+    .expect(404)
+    .then(({body}) => {
+      expect(body).toEqual({msg: 'ID not found'})
+    })
+  })
+  test('Returns 400 if ID is invalid', () => {
+    const comment_id = 'a';
+    return request(app)
+    .delete(`/api/comments/${comment_id}`)
     .expect(400)
     .then(({body}) => {
       expect(body).toEqual({msg: 'Invalid ID'})

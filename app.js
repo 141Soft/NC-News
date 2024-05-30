@@ -2,6 +2,7 @@ const express = require('express')
 const { getTopics } = require('./controllers/topics_controllers');
 const { getEndpoints } = require('./controllers/endpoints_controllers');
 const { getArticleByID, getArticles, getCommentsByID, postCommentByID, patchArticleByID } = require('./controllers/articles_controllers');
+const { deleteCommentByID } = require('./controllers/comment_controllers')
 
 const app = express();
 
@@ -20,6 +21,8 @@ app.get('/api/articles/:article_id/comments', getCommentsByID)
 app.post('/api/articles/:article_id/comments', postCommentByID)
 
 app.patch('/api/articles/:article_id', patchArticleByID)
+
+app.delete('/api/comments/:comment_id', deleteCommentByID)
 
 //Error Handling
 app.use((err, req, res, next) => {
