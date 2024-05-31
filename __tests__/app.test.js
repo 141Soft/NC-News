@@ -143,9 +143,31 @@ describe("/api/articles/:article_id", () => {
           created_at: expect.any(String),
           votes: expect.any(Number),
           article_img_url: expect.any(String),
+          comment_count: expect.any(Number)
         });
       });
   });
+
+  test("Returns article if comment_count is zero", () => {
+    const article_id = 2;
+    return request(app)
+      .get(`/api/articles/${article_id}`)
+      .expect(200)
+      .then(({ body }) => {
+        expect(body.article).toMatchObject({
+          article_id: expect.any(Number),
+          title: expect.any(String),
+          topic: expect.any(String),
+          author: expect.any(String),
+          body: expect.any(String),
+          created_at: expect.any(String),
+          votes: expect.any(Number),
+          article_img_url: expect.any(String),
+          comment_count: 0
+        });
+      });
+  })
+
   test("Returns a 400 error if an invalid ID parameter is used", () => {
     const article_id = "a";
     return request(app)
