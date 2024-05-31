@@ -96,7 +96,7 @@ describe("/api/articles", () => {
   });
 });
 
-describe.only('/api/articles?topics', () => {
+describe('/api/articles?topics', () => {
   test("Returns list of articles with correct topic property", () => {
     const topic = 'mitch'
     return request(app)
