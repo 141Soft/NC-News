@@ -10,6 +10,14 @@ exports.fetchArticleByID = (id) => {
         }
         return rows[0];
     })
+    .then((article) => {
+        return db.query("SELECT COUNT(*) FROM comments WHERE article_id = $1", [id])
+        .then(({ rows }) => {
+            const numComments = Number(rows[0].count)
+            article.comment_count = numComments;
+            return article;
+        })
+    })
 }
 
 exports.fetchArticles = (topic) => {
