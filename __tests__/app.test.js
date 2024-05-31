@@ -96,6 +96,37 @@ describe("/api/articles", () => {
   });
 });
 
+describe('/api/articles?topics', () => {
+  test("Returns list of articles with correct topic property", () => {
+    const topic = 'mitch'
+    return request(app)
+      .get(`/api/articles?topic=${topic}`)
+      .expect(200)
+      .then(({body}) => {
+        body.articles.forEach((article) => {
+          expect(article).toMatchObject({
+            article_id: expect.any(Number),
+            title: expect.any(String),
+            topic: 'mitch',
+            author: expect.any(String),
+            created_at: expect.any(String),
+            votes: expect.any(Number),
+            article_img_url: expect.any(String),
+          })
+        })
+      })
+  })
+  test("Returns 404 when querying a valid topic with no entries", ()=> {
+    const topic = 'paper'
+    return request(app)
+      .get(`/api/articles?topic=${topic}`)
+      .expect(404)
+      .then(({body}) => {
+        expect(body).toEqual({msg: 'No articles found'})
+      })
+  })
+});
+
 describe("/api/articles/:article_id", () => {
   test("Returns an article with the correct id", () => {
     const article_id = 1;
@@ -121,7 +152,7 @@ describe("/api/articles/:article_id", () => {
       .get(`/api/articles/${article_id}`)
       .expect(400)
       .then(({ body }) => {
-        expect(body).toEqual({ msg: "Invalid ID" });
+        expect(body).toEqual({ msg: "Bad Request" });
       });
   });
   test("Returns a 404 error when a valid ID is passed that does not correspond to a row in the DB", () => {
@@ -186,7 +217,7 @@ describe("GET /api/articles/:article_id/comments", () => {
       .get(`/api/articles/${article_id}/comments`)
       .expect(400)
       .then(({ body }) => {
-        expect(body).toEqual({ msg: "Invalid ID" });
+        expect(body).toEqual({ msg: "Bad Request" });
       });
   });
 });
@@ -272,7 +303,7 @@ describe("POST /api/articles/:article_id/comments", () => {
       .send({ username: "fr4nk", body: "Hi, my name is Frank" })
       .expect(400)
       .then(({ body }) => {
-        expect(body).toEqual({ msg: "Invalid ID" });
+        expect(body).toEqual({ msg: "Bad Request" });
       });
   });
 });
@@ -297,6 +328,37 @@ describe("PATCH /api/articles/:article_id", () => {
         });
       });
   });
+
+  test("Ignores unnecessary properties in request body", () => {
+    const article_id = 1;
+    return request(app)
+      .patch(`/api/articles/${article_id}`)
+      .send({ inc_votes: 10, hasWings: true, legs: 6 })
+      .expect(201)
+      .then(({ body }) => {
+        expect(body.article).toMatchObject({
+          article_id: article_id,
+          title: expect.any(String),
+          topic: expect.any(String),
+          author: expect.any(String),
+          body: expect.any(String),
+          created_at: expect.any(String),
+          votes: 110,
+          article_img_url: expect.any(String),
+        });
+      });
+  });
+
+  test('err for wrong inc_votes type', () => {
+    const article_id = 1;
+    return request(app)
+      .patch(`/api/articles/${article_id}`)
+      .send({ inc_votes: 'aphid' })
+      .expect(400)
+      .expect(({body}) => {
+        expect(body).toEqual({msg: 'Bad Request'})
+      })
+  })
 
   test("Has correct vote count with negative vote numbers", () => {
     const article_id = 1;
@@ -347,7 +409,7 @@ describe("PATCH /api/articles/:article_id", () => {
       .send({ inc_votes: 1 })
       .expect(400)
       .then(({ body }) => {
-        expect(body).toEqual({ msg: "Invalid ID" });
+        expect(body).toEqual({ msg: "Bad Request" });
       });
   });
 });
@@ -377,7 +439,7 @@ describe("DELETE /api/comments/:comment_id", () => {
       .delete(`/api/comments/${comment_id}`)
       .expect(400)
       .then(({ body }) => {
-        expect(body).toEqual({ msg: "Invalid ID" });
+        expect(body).toEqual({ msg: "Bad Request" });
       });
   });
 });
